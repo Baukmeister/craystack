@@ -54,6 +54,7 @@ def VAE(gen_net, rec_net, obs_codec, prior_prec, latent_prec):
 
     prior = substack(Uniform(prior_prec), z_view)
 
+    #TODO: latent indices seem to cosnsitently be 0. Why?
     def likelihood(latent_idxs):
         z = std_gaussian_centres(prior_prec)[latent_idxs]
         return substack(obs_codec(gen_net(z)), x_view)
