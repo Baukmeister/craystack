@@ -60,6 +60,7 @@ def NonUniform(enc_statfun, dec_statfun, precision):
              'precision.')
 
     def push(message, symbol):
+        # TODO: PROBLEM IS HERE (in enc_statfun)
         start, freq = enc_statfun(symbol)
         return vrans.push(message, start, freq, precision),
 
@@ -510,12 +511,17 @@ def std_gaussian_centres(precision):
 def _gaussian_cdf(mean, stdd, prior_prec, post_prec):
     def cdf(idx):
         x = std_gaussian_buckets(prior_prec)[idx]
+        # TODO: This seems to be an issue --> understand how it works
+        # For the obs codec the mean and stdd are not 0,1 because the data has higher actual values.
+        # Therefore the norm.cdf function is super close to 0 as the values in x are created in a way
+        # that assumes a standard normal distribution
         return _nearest_int(norm.cdf(x, mean, stdd) * (1 << post_prec))
     return cdf
 
 def _gaussian_ppf(mean, stdd, prior_prec, post_prec):
     cdf = _gaussian_cdf(mean, stdd, prior_prec, post_prec)
     def ppf(cf):
+        # TODO: Investigate why NaNs are created here! -> Standard Deviation is almost 0 (and negative???)!
         x = norm.ppf((cf + 0.5) / (1 << post_prec), mean, stdd)
         # Binary search is faster than using the actual gaussian cdf for the
         # precisions we typically use, however the cdf is O(1) whereas search

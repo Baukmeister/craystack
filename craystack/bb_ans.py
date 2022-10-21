@@ -1,3 +1,5 @@
+import numpy as np
+
 from craystack.codecs import substack, Uniform, \
     std_gaussian_centres, DiagGaussian_StdBins, Codec
 
@@ -21,6 +23,9 @@ def BBANS(prior, likelihood, posterior):
 
     def push(message, data):
         _, posterior_pop = posterior(data)
+        # if this function gets called again and nothing is done to the message in the meantime, the latent which
+        # is sampled here is the same that was encoded in the last step!
+        # TODO investigate posterior pop
         message, latent = posterior_pop(message)
         likelihood_push, _ = likelihood(latent)
         message, = likelihood_push(message, data)
@@ -54,6 +59,7 @@ def VAE(gen_net, rec_net, obs_codec, prior_prec, latent_prec):
         return substack(obs_codec(gen_net(z)), x_view)
 
     def posterior(data):
+        # mean and stdd in z space!
         post_mean, post_stdd = rec_net(data)
         return substack(DiagGaussian_StdBins(
             post_mean, post_stdd, latent_prec, prior_prec), z_view)
