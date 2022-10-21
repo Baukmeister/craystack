@@ -60,7 +60,6 @@ def NonUniform(enc_statfun, dec_statfun, precision):
              'precision.')
 
     def push(message, symbol):
-        # TODO: PROBLEM IS HERE (in enc_statfun)
         start, freq = enc_statfun(symbol)
         return vrans.push(message, start, freq, precision),
 
